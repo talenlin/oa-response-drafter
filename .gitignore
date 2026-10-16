@@ -1,0 +1,33 @@
+# Accounts, cases, browser profiles and generated output
+/output/
+/build/
+/release/
+/dist/
+/.build-tools/
+/.playwright-cli/
+/.venv*/
+venv/
+__pycache__/
+*.py[cod]
+*.log
+*.db
+*.db-*
+*.sqlite*
+*.env
+.env*
+cookies.json
+metadata.json
+storage_state*.json
+workbench-settings.json
+notebooklm-native/
+chrome-profiles/
+
+# Downloaded dependencies
+/desktop/runtime/
+/desktop/vendor/*.whl
+
+# Editor / OS state
+/.idea/
+/.vscode/
+.DS_Store
+Thumbs.db

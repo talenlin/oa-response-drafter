@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>OA阅答 v1.0.1</title>
+    <link rel="icon" href="data:," />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Noto+Sans+SC:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <aside class="rail">
+        <a class="brand" href="#" aria-label="OA阅答 首页">
+          <img class="brand-logo" src="./assets/oa-yueda-logo-v1.png" alt="OA阅答" /><span>OA阅答<small>v1.0.1</small></span>
+        </a>
+        <nav aria-label="主导航">
+          <a class="nav-item active" href="#workspace">工作台</a>
+          <a class="nav-item" id="casesNav" href="./cases.html">案件</a>
+          <a class="nav-item" href="./audit.html">审计</a>
+          <a class="nav-item" id="archiveSettings" href="#settings">设置</a>
+        </nav>
+        <div class="rail-footer"><span class="status-dot"></span>本地桥接器 <strong id="bridgeState">检测中</strong><small id="notebookState">NotebookLM 未检查</small></div>
+      </aside>
+
+      <main>
+        <header class="topbar">
+          <div>
+            <p class="eyebrow">新建案件 / 中国 OA</p>
+            <h1 id="caseTitle">请先上传本轮材料</h1>
+          </div>
+          <div class="top-actions">
+            <span class="pill" id="oaKind">中国 · 首次 OA</span>
+            <button class="ghost" id="notebookLogin">连接 NotebookLM</button>
+            <button class="ghost" id="archiveCase">归档当前案件</button>
+            <button class="ghost" id="addRound">新建 OA 案件</button>
+          </div>
+        </header>
+
+        <section class="notice" aria-label="产品边界说明">
+          <span>◎</span><p>本工作台用于审通策略和证据复核。所有结论均须由专业人员确认后使用。</p>
+          <button class="text-button" id="showAudit">查看本轮审计</button>
+        </section>
+
+        <section class="progress" aria-label="当前 OA 工作流">
+          <div class="step current" id="progressMaterial"><span>1</span><b>材料上传</b><small id="materialCount">0 份文件</small></div>
+          <div class="connector"></div>
+          <div class="step" id="progressIssues"><span>2</span><b>形成争点清单</b><small id="progressIssuesCopy">等待材料</small></div>
+          <div class="connector"></div>
+          <div class="step" id="progressEvidence"><span>3</span><b>选择争点</b><small id="progressEvidenceCopy">等待清单</small></div>
+          <div class="connector"></div>
+          <div class="step" id="progressStrategy"><span>4</span><b>生成答复策略</b><small id="progressStrategyCopy">尚未开始</small></div>
+        </section>
+
+        <section id="historyMaterials" class="history-materials" hidden></section>
+
+        <section class="workspace-grid" id="workspace">
+          <div class="panel materials">
+            <div class="panel-heading"><div><p class="eyebrow" id="roundMaterialLabel">OA-01 / 材料</p><h2 id="materialsTitle">按材料类型上传</h2></div><div class="material-actions"><span class="count" id="qualitySummary">尚未检查</span><button class="ghost" id="prepareOcr">安装 / 初始化 OCR</button><button class="ghost" id="startQualityCheck" disabled>启动文本质量检查</button><button class="ghost" id="startOcrReview" disabled>启动 OCR 复核</button></div></div>
+            <div id="materialGroups" class="material-groups"></div>
+            <div class="workflow-next" id="workflowNext"></div>
+          </div>
+
+          <div class="panel issues" id="issuesPanel">
+            <div class="panel-heading"><div class="issue-heading-title"><p class="eyebrow">争点清单</p><h2>选择要分析的问题</h2><span class="count issue-selection-status" id="selectedCount">0 已选择</span></div><div class="issue-heading-actions"><button class="ghost" id="toggleIssuesPanel" type="button" aria-expanded="true">收起</button></div></div>
+            <p class="panel-intro">系统先按 OA 分组；每次仅提交一项争点及其必要证据，避免输出被截断。</p>
+            <div id="issueList" class="issue-list"></div>
+            <button class="primary full" id="analyseSelected" disabled>分析已选争点</button>
+          </div>
+
+          <div class="panel evidence">
+            <div class="panel-heading"><div><p class="eyebrow">证据预览</p><h2 id="evidenceTitle">选择一个争点</h2></div><span class="confidence">需人工复核</span></div>
+            <div id="evidenceBody" class="empty-state"><span class="empty-icon">⌁</span><p>点击左侧争点，查看将用于分析的申请文件、OA 和对比文件定位。</p></div>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <dialog id="confirmDialog">
+      <form method="dialog" class="dialog-card" id="confirmForm">
+        <button class="close" value="cancel" aria-label="关闭">×</button>
+        <p class="eyebrow">发送前确认</p><h2>确认本次 NotebookLM 分析</h2>
+        <p class="dialog-copy" id="confirmCopy">仅发送下列文件以分析一个争点。Google 登录态仅存在于你的本机桥接器。</p>
+        <label class="account-label">目标 Google 账号 <select id="account"><option id="accountOption">请先连接本机 NotebookLM</option></select></label>
+        <div class="confirm-files" id="confirmFiles"></div>
+        <label class="checkline"><input type="checkbox" id="consent" /> 我已核对文件清单和目标账号，并授权本次发送。</label>
+        <button class="primary full" id="queueJob" value="default" disabled>确认并提交到 NotebookLM</button>
+      </form>
+    </dialog>
+
+    <dialog id="loginDialog">
+      <div class="dialog-card">
+        <button class="close" id="closeLogin" aria-label="关闭">×</button>
+        <p class="eyebrow">本机桥接器 / Google 账号</p><h2>连接 NotebookLM</h2>
+        <p class="dialog-copy" id="loginStatus">正在读取 OA阅答 内置桥接器的本机登录状态。</p>
+        <div class="login-steps">
+          <div><span>1</span><p><b>仅在本机登录</b><small>Google 登录态不会被工作台上传或保存。</small></p></div>
+          <div><span>2</span><p><b>浏览器完成登录</b><small>登录页只在你自己的电脑上打开。</small></p></div>
+          <div><span>3</span><p><b>回到工作台确认文件</b><small>每次发送前仍需核对账号和材料清单。</small></p></div>
+        </div>
+        <p class="install-hint" id="installHint" hidden></p>
+        <button class="primary full" id="beginLogin">在本机打开 Google 登录</button>
+      </div>
+    </dialog>
+
+    <dialog id="ocrDialog">
+      <div class="dialog-card">
+        <button class="close" id="closeOcrDialog" aria-label="关闭">×</button>
+        <p class="eyebrow">本机解析 / OCR</p><h2 id="ocrDialogTitle">OCR 复核</h2>
+        <p class="dialog-copy" id="ocrDialogCopy"></p>
+        <div class="ocr-status-box" id="ocrStatusBox"></div>
+        <p class="install-hint" id="ocrInstallHint" hidden></p>
+        <button class="primary full" id="installOcr" hidden>安装本机 PaddleOCR</button>
+      </div>
+    </dialog>
+
+    <dialog id="newRoundDialog">
+      <div class="dialog-card">
+        <p class="eyebrow">案件归档</p><h2>归档当前案件并新建案件？</h2>
+        <p class="dialog-copy">当前案件的本机 OCR 留档、Notebook、问题清单和答复历史会保留在本机，并可在左侧“案件”中查看。</p>
+        <p class="dialog-copy">随后工作台会清空，进入一个全新的案件；新案件从“首次 OA”开始。</p>
+        <div class="dialog-actions"><button class="ghost" id="cancelNewRound">留在当前案件</button><button class="primary" id="confirmNewRound">归档并新建案件</button></div>
+      </div>
+    </dialog>
+
+    <dialog id="casesDialog">
+      <div class="dialog-card cases-dialog-card">
+        <button class="close" id="closeCases" aria-label="关闭">×</button>
+        <p class="eyebrow">本机案件</p><h2>已归档案件</h2>
+        <p class="dialog-copy">归档仅保存在本机；每项保留对应的材料、Notebook 和答复记录。</p>
+        <div class="case-list" id="caseList"></div>
+      </div>
+    </dialog>
+
+    <dialog id="archiveSettingsDialog">
+      <div class="dialog-card">
+        <button class="close" id="closeArchiveSettings" aria-label="关闭">×</button>
+        <p class="eyebrow">本机设置 / 存档</p><h2>本地存档位置</h2>
+        <p class="dialog-copy">后续新建案件、材料解析、Notebook 记录和答复历史会保存到这个文件夹。现有存档不会被移动或删除。</p>
+        <label class="account-label">存档文件夹 <input id="archiveRootInput" type="text" placeholder="例如：D:\Patent-OA-Archive" autocomplete="off" /></label>
+        <p class="archive-settings-current" id="archiveSettingsCurrent"></p>
+        <div class="dialog-actions"><button class="ghost" id="resetArchiveSettings" type="button">使用默认位置</button><button class="primary" id="saveArchiveSettings" type="button">保存位置</button></div>
+      </div>
+    </dialog>
+
+    <dialog id="toastDialog"><div class="toast-card"><span class="toast-mark">✓</span><div><b id="toastTitle"></b><p id="toastText"></p></div></div></dialog>
+    <script src="./notebook_issues.js"></script>
+    <script src="./ocr-file-cache.js"></script>
+    <script src="./app.js"></script>
+  </body>
+</html>

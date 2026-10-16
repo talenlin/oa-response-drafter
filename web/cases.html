@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>案件 · OA阅答 v1.0.1</title>
+    <link rel="icon" href="data:," />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Noto+Sans+SC:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <aside class="rail">
+        <a class="brand" href="./" aria-label="OA阅答 首页"><img class="brand-logo" src="./assets/oa-yueda-logo-v1.png" alt="OA阅答" /><span>OA阅答<small>v1.0.1</small></span></a>
+        <nav aria-label="主导航">
+          <a class="nav-item" href="./">工作台</a>
+          <a class="nav-item active" href="./cases.html">案件</a>
+          <a class="nav-item" href="./audit.html">审计</a>
+          <a class="nav-item" href="./#settings">设置</a>
+        </nav>
+        <div class="rail-footer"><span class="status-dot ready"></span>本地桥接器<strong>案件记录</strong><small>材料与答复均保留在本机</small></div>
+      </aside>
+      <main class="cases-page">
+        <header class="topbar">
+          <div><p class="eyebrow">本机案件</p><h1>案件</h1><p class="cases-intro">打开案件后可继续编辑已上传材料，或在同一申请号下新增后续 OA。</p></div>
+          <a class="ghost" href="./?newCase=1">新建 OA 案件</a>
+        </header>
+        <section class="case-page-notice">案件不是封存副本。每个案件保留各 OA 轮次的材料、NotebookLM 和答复历史；“新增 OA 轮次”会在同一案件中继续处理后续审查意见。</section>
+        <section id="casePageList" class="case-page-list" aria-live="polite"><p class="case-empty">正在读取本机案件…</p></section>
+      </main>
+    </div>
+    <script src="./cases.js"></script>
+  </body>
+</html>
